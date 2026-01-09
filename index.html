@@ -56,6 +56,19 @@
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.95);
+            z-index: 50;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
     </style>
 </head>
 <body>
@@ -70,7 +83,7 @@
             passingScore: 4,
             skipCountingRange: [2, 10],
             maxDenominator: 12,
-            unlockAllLevels: true, // Set to true to unlock Phase 2 immediately for testing
+            unlockAllLevels: false, // Set to true to unlock Phase 2 immediately for testing
         };
 
         const { useState, useEffect, useMemo } = React;
@@ -91,9 +104,11 @@
             Lock: ({size=24, className, ...props}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>,
             Grid: ({size=24, className, ...props}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/><path d="M9 3v18"/><path d="M15 3v18"/></svg>,
             Scissors: ({size=24, className, ...props}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg>,
+            HelpCircle: ({size=24, className, ...props}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>,
+            Shovel: ({size=24, className, ...props}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}><path d="M2 22v-5l5-5 5 5-5 5z"/><path d="M9.5 14.5L16 8"/><path d="M17 2l5 5-.5.5a3.53 3.53 0 0 1-5 0s0 0 0 0L17 2z"/></svg>,
         };
 
-        const { Sprout, TreeDeciduous, Flower, Leaf, RefreshCw, Trophy, Home, CheckCircle, XCircle, Lock, Grid, Scissors } = Icons;
+        const { Sprout, TreeDeciduous, Flower, Leaf, RefreshCw, Trophy, Home, CheckCircle, XCircle, Lock, Grid, Scissors, HelpCircle, Shovel } = Icons;
 
         // ==========================================
         // UTILITY FUNCTIONS
@@ -208,15 +223,11 @@
             }
         };
 
-        // NEW LEVELS 7-10
+        // NEW LEVELS 7-11
 
-        // Level 7: Pruning (Simplifying)
+        // Level 7: Pruning (Simplifying) - BUG FIXED
         const generateLevel7Question = () => {
             // Pick a simple fraction 1/2, 1/3, 2/3, 1/4, 3/4
-            const baseNum = [1, 1, 2, 1, 3][getRandomInt(0, 4)];
-            const baseDenom = [2, 3, 3, 4, 4][getRandomInt(0, 4)];
-            // Avoid duplicates like 2/3 and 2/3.
-            // Just use a simpler set logic:
             const bases = [{n:1, d:2}, {n:1, d:3}, {n:2, d:3}, {n:1, d:4}, {n:3, d:4}, {n:1, d:5}];
             const base = bases[getRandomInt(0, bases.length-1)];
             
@@ -224,16 +235,19 @@
             const complexNum = base.n * multiplier;
             const complexDenom = base.d * multiplier;
 
+            // Generate options ensuring the CORRECT ANSWER (base) is included
+            const options = [
+                base, // The correct simplified version
+                {n: complexNum, d: complexDenom}, // The unsimplified one
+                {n: base.n, d: base.d + 1}, // Distractor
+                {n: base.n + 1, d: base.d}, // Distractor
+            ];
+
             return {
                 type: 'simplify',
                 complex: { top: complexNum, bottom: complexDenom },
-                correctAnswer: base, // Object {n, d}
-                distractors: [
-                    {n: complexNum, d: complexDenom}, // The unsimplified one
-                    {n: base.n, d: base.d + 1},
-                    {n: base.n + 1, d: base.d},
-                    {n: 1, d: complexDenom}
-                ],
+                correctAnswer: base,
+                options: options.sort(() => Math.random() - 0.5), // Shuffle them
                 instruction: "Prune (simplify) this fraction to its smallest form."
             };
         };
@@ -252,18 +266,39 @@
                 instruction: "Plant the rows together. Add the fractions."
             };
         };
-
-        // Level 9: Grafting (Adding Unlike)
+        
+        // NEW LEVEL 9: Composting (Converting before Adding)
         const generateLevel9Question = () => {
-            // Use simple pairs where one is a multiple of the other or easy LCD
-            // 1/2 + 1/4, 1/3 + 1/6, 1/2 + 1/3
+            // Scenarios where we need to convert f1 to match f2's denominator
+            // e.g. 1/2 + 1/4 -> Convert 1/2 to ?/4
+            const scenarios = [
+                { f1: {n:1, d:2}, f2: {n:1, d:4}, target: {n:2, d:4} },
+                { f1: {n:1, d:3}, f2: {n:1, d:6}, target: {n:2, d:6} },
+                { f1: {n:1, d:2}, f2: {n:1, d:6}, target: {n:3, d:6} },
+                { f1: {n:2, d:3}, f2: {n:1, d:6}, target: {n:4, d:6} },
+                { f1: {n:1, d:4}, f2: {n:1, d:8}, target: {n:2, d:8} },
+                { f1: {n:1, d:2}, f2: {n:1, d:8}, target: {n:4, d:8} },
+            ];
+            const sc = scenarios[getRandomInt(0, scenarios.length-1)];
+            
+            return {
+                type: 'convertForAdd',
+                f1: sc.f1,
+                f2: sc.f2,
+                correctAnswer: sc.target,
+                instruction: `We can't add unlike denominators! Help prepare the soil by changing ${sc.f1.n}/${sc.f1.d} into ${sc.f2.d}ths.`
+            }
+        };
+
+        // Level 10: Grafting (Adding Unlike - Moved from old 9)
+        const generateLevel10Question = () => {
             const scenarios = [
                 {f1: {n:1, d:2}, f2: {n:1, d:4}, ans: {n:3, d:4}},
                 {f1: {n:1, d:4}, f2: {n:1, d:2}, ans: {n:3, d:4}},
-                {f1: {n:1, d:3}, f2: {n:1, d:6}, ans: {n:3, d:6}}, // 1/2 unsimplified
+                {f1: {n:1, d:3}, f2: {n:1, d:6}, ans: {n:3, d:6}}, 
                 {f1: {n:1, d:6}, f2: {n:1, d:3}, ans: {n:3, d:6}},
                 {f1: {n:1, d:2}, f2: {n:1, d:3}, ans: {n:5, d:6}},
-                {f1: {n:1, d:4}, f2: {n:1, d:4}, ans: {n:2, d:4}}, // 1/2 unsimplified
+                {f1: {n:1, d:4}, f2: {n:1, d:4}, ans: {n:2, d:4}}, 
                 {f1: {n:1, d:5}, f2: {n:2, d:10}, ans: {n:4, d:10}}, 
             ];
             const sc = scenarios[getRandomInt(0, scenarios.length-1)];
@@ -277,12 +312,13 @@
             };
         };
 
-        // Level 10: The Harvest (Mixed Review)
-        const generateLevel10Question = () => {
+        // Level 11: The Harvest (Mixed Review - Moved from old 10)
+        const generateLevel11Question = () => {
             const r = Math.random();
-            if (r < 0.33) return generateLevel7Question();
-            if (r < 0.66) return generateLevel6Question();
-            return generateLevel9Question();
+            if (r < 0.25) return generateLevel7Question();
+            if (r < 0.50) return generateLevel6Question();
+            if (r < 0.75) return generateLevel9Question();
+            return generateLevel10Question();
         };
 
 
@@ -329,6 +365,74 @@
         };
 
         // ==========================================
+        // COMPONENT: HELP MODAL
+        // ==========================================
+        const HelpModal = ({ onClose, phase }) => {
+            return (
+                <div className="modal-overlay" onClick={onClose}>
+                    <div className="bg-white p-8 rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-3xl font-bold text-stone-800 handwritten">Garden Guide</h2>
+                            <button onClick={onClose} className="p-2 hover:bg-stone-100 rounded-full text-stone-500">
+                                <XCircle size={28} />
+                            </button>
+                        </div>
+
+                        <div className="space-y-6 text-stone-700">
+                            <div className="bg-green-50 p-4 rounded-xl border border-green-100">
+                                <h3 className="font-bold text-green-800 text-xl mb-2 flex items-center gap-2">
+                                    <Sprout size={20}/> Basics
+                                </h3>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <div className="font-bold text-sm uppercase text-stone-400">Numerator (Top)</div>
+                                        <div className="text-lg">How many parts we have.</div>
+                                    </div>
+                                    <div>
+                                        <div className="font-bold text-sm uppercase text-stone-400">Denominator (Bottom)</div>
+                                        <div className="text-lg">How many parts make a whole.</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="bg-amber-50 p-4 rounded-xl border border-amber-100">
+                                <h3 className="font-bold text-amber-800 text-xl mb-2 flex items-center gap-2">
+                                    <TreeDeciduous size={20}/> The Giant One
+                                </h3>
+                                <p className="mb-2">Multiplying by 1 doesn't change the value!</p>
+                                <div className="flex items-center gap-2 font-bold text-xl justify-center bg-white p-2 rounded-lg border border-amber-200">
+                                    <Fraction top={1} bottom={2} /> 
+                                    <span>&times;</span>
+                                    <div className="giant-one border-amber-400 text-amber-600">
+                                        <Fraction top={2} bottom={2} />
+                                    </div>
+                                    <span>=</span>
+                                    <Fraction top={2} bottom={4} />
+                                </div>
+                            </div>
+
+                            <div className="bg-cyan-50 p-4 rounded-xl border border-cyan-100">
+                                <h3 className="font-bold text-cyan-800 text-xl mb-2 flex items-center gap-2">
+                                    <Grid size={20}/> Advanced Skills
+                                </h3>
+                                <ul className="list-disc pl-5 space-y-2">
+                                    <li><strong>Simplify:</strong> Divide top and bottom by the same number to make them smaller.</li>
+                                    <li><strong>Common Denominator:</strong> You can only add fractions if the bottom numbers match!</li>
+                                    <li><strong>Like Fractions:</strong> Have the same denominator (e.g. 1/4 and 3/4).</li>
+                                    <li><strong>Unlike Fractions:</strong> Have different denominators (e.g. 1/2 and 1/3). You must fix them before adding!</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <button onClick={onClose} className="w-full mt-8 bg-stone-800 hover:bg-stone-900 text-white font-bold py-3 rounded-xl transition">
+                            Got it, back to the garden!
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+
+        // ==========================================
         // MAIN APP COMPONENT
         // ==========================================
         const App = () => {
@@ -338,14 +442,18 @@
             const [currentQuestion, setCurrentQuestion] = useState(null);
             const [feedback, setFeedback] = useState(null);
             const [gameState, setGameState] = useState('menu');
-            const [gardenProgress, setGardenProgress] = useState([false, false, false, false, false, false, false, false, false, false]);
+            const [showHelp, setShowHelp] = useState(false);
+            
+            // INCREASED to 11 for the new level
+            const [gardenProgress, setGardenProgress] = useState(Array(11).fill(false));
 
             useEffect(() => {
                 const savedProgress = localStorage.getItem('fractionGardenProgress');
                 if (savedProgress) {
                     const parsed = JSON.parse(savedProgress);
-                    if (parsed.length < 10) {
-                        const padded = [...parsed, ...Array(10 - parsed.length).fill(false)];
+                    // Migration helper: If user has fewer levels saved, pad the array
+                    if (parsed.length < 11) {
+                        const padded = [...parsed, ...Array(11 - parsed.length).fill(false)];
                         setGardenProgress(padded);
                     } else {
                         setGardenProgress(parsed);
@@ -361,7 +469,7 @@
             const resetProgress = () => {
                 if(confirm("Are you sure you want to clear your garden? All progress will be lost.")) {
                     localStorage.removeItem('fractionGardenProgress');
-                    setGardenProgress(Array(10).fill(false));
+                    setGardenProgress(Array(11).fill(false));
                     setGameState('menu');
                 }
             };
@@ -386,8 +494,9 @@
                     case 6: q = generateLevel6Question(); break;
                     case 7: q = generateLevel7Question(); break;
                     case 8: q = generateLevel8Question(); break;
-                    case 9: q = generateLevel9Question(); break;
-                    case 10: q = generateLevel10Question(); break;
+                    case 9: q = generateLevel9Question(); break; // New
+                    case 10: q = generateLevel10Question(); break; // Old 9
+                    case 11: q = generateLevel11Question(); break; // Old 10
                     default: q = generateLevel1Question();
                 }
                 setCurrentQuestion(q);
@@ -401,9 +510,7 @@
                     isCorrect = parseInt(userAnswer) === q.correctAnswer;
                 } else if (q.type === 'visual') {
                      isCorrect = userAnswer === q.correctAnswer;
-                } else if (q.type === 'simplify') {
-                    isCorrect = userAnswer.n === q.correctAnswer.n && userAnswer.d === q.correctAnswer.d;
-                } else if (q.type === 'addLike' || q.type === 'addUnlike') {
+                } else if (q.type === 'simplify' || q.type === 'convertForAdd' || q.type === 'addLike' || q.type === 'addUnlike') {
                     isCorrect = userAnswer.n === q.correctAnswer.n && userAnswer.d === q.correctAnswer.d;
                 }
 
@@ -445,7 +552,12 @@
                 const isPhase2Unlocked = phase1Complete || CONFIG.unlockAllLevels;
                 
                 return (
-                    <div className="max-w-4xl mx-auto p-6">
+                    <div className="max-w-4xl mx-auto p-6 relative">
+                        {/* Help Button */}
+                        <button onClick={() => setShowHelp(true)} className="absolute top-6 right-6 p-2 bg-white rounded-full text-stone-500 hover:text-stone-800 hover:bg-stone-100 shadow-sm transition">
+                            <HelpCircle size={32} />
+                        </button>
+
                         <header className="text-center mb-8">
                             <h1 className="text-5xl font-bold text-stone-800 mb-2 handwritten">The Fraction Garden</h1>
                             <p className="text-stone-600 text-lg">Cultivate your understanding, one fraction at a time.</p>
@@ -490,13 +602,14 @@
                                 <Grid className="text-cyan-600"/> Phase 2: The Greenhouse
                             </h2>
                             
-                            <div className={`grid grid-cols-1 md:grid-cols-5 gap-4 ${!isPhase2Unlocked ? 'opacity-50 pointer-events-none' : ''}`}>
+                            <div className={`grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 ${!isPhase2Unlocked ? 'opacity-50 pointer-events-none' : ''}`}>
                                 {[
                                     { name: "Common Ground", sub: "Finding LCD", icon: Grid, level: 6 },
                                     { name: "Pruning", sub: "Simplifying", icon: Scissors, level: 7 },
                                     { name: "Planting Rows", sub: "Adding Like", icon: Leaf, level: 8 },
-                                    { name: "Grafting", sub: "Adding Unlike", icon: Sprout, level: 9 },
-                                    { name: "The Harvest", sub: "Mixed Review", icon: Trophy, level: 10 },
+                                    { name: "Composting", sub: "Converting", icon: Shovel, level: 9 },
+                                    { name: "Grafting", sub: "Adding Unlike", icon: Sprout, level: 10 },
+                                    { name: "The Harvest", sub: "Mixed Review", icon: Trophy, level: 11 },
                                 ].map((item) => (
                                     <button 
                                         key={item.level}
@@ -539,14 +652,19 @@
                 const q = currentQuestion;
 
                 return (
-                    <div className="max-w-2xl mx-auto bg-white p-8 rounded-3xl shadow-lg border border-stone-100 fade-in min-h-[400px] flex flex-col justify-between">
+                    <div className="max-w-2xl mx-auto bg-white p-8 rounded-3xl shadow-lg border border-stone-100 fade-in min-h-[400px] flex flex-col justify-between relative">
+                         {/* Help Button In-Game */}
+                         <button onClick={() => setShowHelp(true)} className="absolute top-6 right-6 p-2 bg-stone-50 rounded-full text-stone-400 hover:text-stone-800 hover:bg-stone-200 transition">
+                            <HelpCircle size={24} />
+                        </button>
+
                         <div className="flex justify-between items-center mb-8 border-b border-stone-100 pb-4">
                             <div className="flex items-center gap-2 text-stone-500">
                                 <span className="font-bold">Level {currentLevel}</span>
                                 <span className="text-stone-300">|</span>
                                 <span>Question {questionCount + 1}/{CONFIG.questionsPerLevel}</span>
                             </div>
-                            <button onClick={() => setGameState('menu')} className="p-2 hover:bg-stone-100 rounded-full text-stone-400">
+                            <button onClick={() => setGameState('menu')} className="p-2 hover:bg-stone-100 rounded-full text-stone-400 mr-12">
                                 <Home size={20} />
                             </button>
                         </div>
@@ -657,6 +775,23 @@
                                 </div>
                             )}
 
+                            {/* Level 9 Render Logic */}
+                            {q.type === 'convertForAdd' && (
+                                <div className="flex flex-col items-center gap-4">
+                                    <div className="flex gap-4 items-center text-4xl opacity-50">
+                                        <Fraction top={q.f1.n} bottom={q.f1.d} size="text-3xl" />
+                                        <span className="text-stone-400">+</span>
+                                        <Fraction top={q.f2.n} bottom={q.f2.d} size="text-3xl" />
+                                    </div>
+                                    <div className="text-stone-500 text-sm">↓ Convert ↓</div>
+                                    <div className="flex gap-4 items-center text-4xl">
+                                        <div className="w-20 h-24 bg-amber-50 border-2 border-dashed border-amber-300 rounded flex items-center justify-center text-stone-400">?</div>
+                                        <span className="text-stone-400">+</span>
+                                        <Fraction top={q.f2.n} bottom={q.f2.d} size="text-4xl" />
+                                    </div>
+                                </div>
+                            )}
+
                             {(q.type === 'addLike' || q.type === 'addUnlike') && (
                                 <div className="flex gap-4 items-center text-4xl">
                                     <Fraction top={q.f1.n} bottom={q.f1.d} size="text-4xl" />
@@ -707,11 +842,27 @@
                                 </button>
                             ))}
 
-                            {/* Phase 2 Inputs: Fraction Selection */}
+                            {/* Level 7: Simplify Inputs - Corrected to use q.options */}
                             {q.type === 'simplify' && (
                                 <div className="flex gap-4">
-                                    {q.distractors.sort(() => Math.random() - 0.5).map((opt, i) => (
+                                    {q.options.map((opt, i) => (
                                         <button key={i} onClick={() => handleAnswer(opt)} className="bg-stone-100 hover:bg-cyan-100 text-stone-800 font-bold py-3 px-4 rounded-xl transition shadow-sm border border-stone-200 text-xl">
+                                            <Fraction top={opt.n} bottom={opt.d} />
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* Level 9: Convert Inputs */}
+                            {q.type === 'convertForAdd' && (
+                                <div className="flex gap-4">
+                                     {[
+                                        q.correctAnswer,
+                                        {n: q.correctAnswer.n - 1, d: q.correctAnswer.d},
+                                        {n: q.correctAnswer.n + 1, d: q.correctAnswer.d},
+                                        {n: 1, d: q.correctAnswer.d}
+                                    ].sort(() => Math.random() - 0.5).map((opt, i) => (
+                                        <button key={i} onClick={() => handleAnswer(opt)} className="bg-stone-100 hover:bg-amber-100 text-stone-800 font-bold py-3 px-4 rounded-xl transition shadow-sm border border-stone-200 text-xl">
                                             <Fraction top={opt.n} bottom={opt.d} />
                                         </button>
                                     ))}
@@ -781,6 +932,7 @@
 
             return (
                 <div className="min-h-screen bg-stone-50 py-8 px-4">
+                    {showHelp && <HelpModal onClose={() => setShowHelp(false)} />}
                     {gameState === 'menu' && renderMenu()}
                     {gameState === 'playing' && renderGameContent()}
                     {gameState === 'levelComplete' && renderLevelComplete()}
