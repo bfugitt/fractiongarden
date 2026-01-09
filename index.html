@@ -691,7 +691,13 @@
                             </button>
                         </div>
 
-                        <h2 className="text-2xl text-center text-stone-800 mb-8 handwritten">{q.instruction}</h2>
+                        <h2 className={`text-2xl text-center text-stone-800 handwritten ${q.type === 'simplify' ? 'mb-2' : 'mb-8'}`}>{q.instruction}</h2>
+                        
+                        {q.type === 'simplify' && (
+                             <p className="text-stone-500 text-center mb-8 text-lg">
+                                (Divide the top and bottom by the same number)
+                             </p>
+                        )}
 
                         <div className="flex-grow flex flex-col items-center justify-center mb-8">
                             {/* Phase 1 Render Logic */}
