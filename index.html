@@ -15,7 +15,7 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Google Fonts: Noto Sans for text, Patrick Hand for a 'handwritten' teacher feel -->
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600&family=Patrick+Hand&display=swap" rel="stylesheet">
 
     <style>
@@ -26,17 +26,9 @@
         .handwritten {
             font-family: 'Patrick Hand', cursive;
         }
-        /* Custom scrollbar for a cleaner look */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #e7e5e4; 
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #a8a29e; 
-            border-radius: 4px;
-        }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #e7e5e4; }
+        ::-webkit-scrollbar-thumb { background: #a8a29e; border-radius: 4px; }
         .fraction {
             display: inline-block;
             text-align: center;
@@ -59,10 +51,7 @@
             display: inline-block;
             position: relative;
         }
-        /* Animation classes */
-        .fade-in {
-            animation: fadeIn 0.5s ease-in;
-        }
+        .fade-in { animation: fadeIn 0.5s ease-in; }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
@@ -75,24 +64,18 @@
     <script type="text/babel">
         // ==========================================
         // TEACHER CONFIGURATION SECTION
-        // Edit these variables to adjust the game difficulty
         // ==========================================
         const CONFIG = {
-            questionsPerLevel: 5, // How many questions to answer to pass a level
-            passingScore: 4,      // Minimum correct answers needed to advance
-            
-            // Level 1: Skip Counting
-            skipCountingRange: [2, 10], // Practice skip counting for numbers 2 through 10
-            
-            // Level 4/5: Complexity
-            maxDenominator: 12,   // The highest denominator they will encounter
+            questionsPerLevel: 5,
+            passingScore: 4,
+            skipCountingRange: [2, 10],
+            maxDenominator: 12,
         };
 
         const { useState, useEffect, useMemo } = React;
         
         // ==========================================
         // ICON COMPONENTS
-        // Manually defined to ensure compatibility without build steps
         // ==========================================
         const Icons = {
             Sprout: ({size=24, className, ...props}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}><path d="M7 20h10"/><path d="M10 20c5.5-2.5.8-6.4 3-10"/><path d="M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4 0 5.5.8z"/><path d="M14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.3-1.4 1-1 1.6-2.3 1.7-4.6-2.7.1-4 1-4.9 2z"/></svg>,
@@ -103,102 +86,91 @@
             RefreshCw: ({size=24, className, ...props}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M3 21v-5h5"/></svg>,
             Home: ({size=24, className, ...props}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,
             CheckCircle: ({size=24, className, ...props}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>,
-            XCircle: ({size=24, className, ...props}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
+            XCircle: ({size=24, className, ...props}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>,
+            Lock: ({size=24, className, ...props}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>,
+            Grid: ({size=24, className, ...props}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/><path d="M9 3v18"/><path d="M15 3v18"/></svg>
         };
 
-        const { Sprout, TreeDeciduous, Flower, Leaf, RefreshCw, Trophy, Home, CheckCircle, XCircle } = Icons;
+        const { Sprout, TreeDeciduous, Flower, Leaf, RefreshCw, Trophy, Home, CheckCircle, XCircle, Lock, Grid } = Icons;
 
         // ==========================================
         // UTILITY FUNCTIONS
         // ==========================================
         const getRandomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
         
-        const generateFactors = (num) => {
-            const factors = [];
-            for (let i = 1; i <= num; i++) {
-                if (num % i === 0) factors.push(i);
+        // Find LCM (Least Common Multiple) for common denominators
+        const findLCM = (n1, n2) => {
+            let lar = Math.max(n1, n2);
+            let small = Math.min(n1, n2);
+            for (let i = lar; ; i += lar) {
+                if (i % small === 0) return i;
             }
-            return factors;
         };
 
         // ==========================================
         // GAME LEVELS LOGIC
         // ==========================================
         
-        // Level 1: The Seedling (Skip Counting)
         const generateLevel1Question = () => {
             const base = getRandomInt(CONFIG.skipCountingRange[0], CONFIG.skipCountingRange[1]);
             const startMult = getRandomInt(1, 7);
-            const sequence = [
-                base * startMult,
-                base * (startMult + 1),
-                base * (startMult + 2),
-                base * (startMult + 3)
-            ];
-            
-            // Remove one item to make it a blank
+            const sequence = [base * startMult, base * (startMult + 1), base * (startMult + 2), base * (startMult + 3)];
             const missingIndex = getRandomInt(0, 3);
             const answer = sequence[missingIndex];
-            sequence[missingIndex] = null; // null represents the blank
-
+            sequence[missingIndex] = null;
             return {
-                type: 'sequence',
-                base: base,
-                sequence: sequence,
-                correctAnswer: answer,
+                type: 'sequence', base, sequence, correctAnswer: answer,
                 instruction: `Fill in the missing number to help the seedling grow. (Skip counting by ${base})`
             };
         };
 
-        // Level 2: The Sprout (Identity Property / Magic One)
         const generateLevel2Question = () => {
             const num = getRandomInt(2, 9);
-            const isIdentity = Math.random() > 0.5;
-            
-            if (isIdentity) {
-                return {
-                    type: 'magicOne',
-                    fraction: { top: num, bottom: num },
-                    correctAnswer: 1,
-                    instruction: "What is this fraction equal to?"
-                };
+            if (Math.random() > 0.5) {
+                return { type: 'magicOne', fraction: { top: num, bottom: num }, correctAnswer: 1, instruction: "What is this fraction equal to?" };
             } else {
-                return {
-                    type: 'makeOne',
-                    top: num,
-                    correctAnswer: num,
-                    instruction: "Complete the fraction to make it equal to the Magic One (1)."
-                };
+                return { type: 'makeOne', top: num, correctAnswer: num, instruction: "Complete the fraction to make it equal to the Magic One (1)." };
             }
         };
 
-        // Level 3: The Sapling (Visual Equivalence)
+        // UPDATED LEVEL 3: VISUALS WITH NON-MATCHES
         const generateLevel3Question = () => {
-            // Simple equivalents: 1/2 = 2/4, 1/3 = 2/6, etc.
             const baseDenom = getRandomInt(2, 5);
             const multiplier = getRandomInt(2, 3);
-            
             const num = 1;
             const denom = baseDenom;
             
-            const eqNum = num * multiplier;
-            const eqDenom = denom * multiplier;
+            const isMatch = Math.random() > 0.4; // 60% chance of match
+            
+            let eqNum, eqDenom;
+
+            if (isMatch) {
+                eqNum = num * multiplier;
+                eqDenom = denom * multiplier;
+            } else {
+                // Generate a "fake" equivalent
+                eqDenom = denom * multiplier;
+                eqNum = num * multiplier + (Math.random() > 0.5 ? 1 : -1); // Off by one
+                // Bounds check
+                if (eqNum < 1) eqNum = 1;
+                if (eqNum >= eqDenom) eqNum = eqDenom - 1;
+                // Double check it didn't accidentally become equal
+                if (num/denom === eqNum/eqDenom) eqNum += 1;
+            }
 
             return {
                 type: 'visual',
                 fraction1: { top: num, bottom: denom },
                 fraction2: { top: eqNum, bottom: eqDenom },
-                correctAnswer: true, // For now, we just ask if they match
-                instruction: `Does the first fraction cover the same amount of space as the second?`
+                correctAnswer: isMatch ? 'yes' : 'no',
+                instruction: `Do these two fractions cover the exact same amount of space?`
             };
         };
 
-        // Level 4: The Tree (The Giant One)
         const generateLevel4Question = () => {
             const top = getRandomInt(1, 4);
-            const bottom = getRandomInt(top + 1, 6); // Proper fraction
+            const bottom = getRandomInt(top + 1, 6);
             const multiplier = getRandomInt(2, 4);
-            
             return {
                 type: 'giantOne',
                 start: { top, bottom },
@@ -208,13 +180,11 @@
             };
         };
 
-        // Level 5: The Forest (Target Denominator)
         const generateLevel5Question = () => {
             const startDenom = getRandomInt(2, 6);
             const multiplier = getRandomInt(2, 5);
             const targetDenom = startDenom * multiplier;
             const startNum = getRandomInt(1, startDenom - 1);
-
             return {
                 type: 'target',
                 start: { top: startNum, bottom: startDenom },
@@ -222,6 +192,26 @@
                 correctAnswer: multiplier,
                 instruction: `I need a denominator of ${targetDenom}. What 'Giant One' should I use?`
             };
+        };
+
+        // NEW LEVEL 6: COMMON GROUND (LCD)
+        const generateLevel6Question = () => {
+            // Pick two denominators that aren't multiples of each other for more interest, 
+            // or simple ones like 2 and 3, 3 and 4, 2 and 5.
+            const pairs = [[2,3], [3,4], [2,5], [3,5], [4,5], [2,4], [3,6]]; 
+            const pair = pairs[getRandomInt(0, pairs.length-1)];
+            const d1 = pair[0];
+            const d2 = pair[1];
+            
+            const lcd = findLCM(d1, d2);
+            
+            return {
+                type: 'lcd',
+                d1: d1,
+                d2: d2,
+                correctAnswer: lcd,
+                instruction: `To add fractions with denominators ${d1} and ${d2}, we need a Common Denominator. What is the lowest one we can use?`
+            }
         };
 
         // ==========================================
@@ -238,37 +228,24 @@
         // COMPONENT: FRACTION PIE VISUAL
         // ==========================================
         const FractionPie = ({ num, denom, size=120 }) => {
-             // Calculate coordinates
              const r = 40;
-             const c = 50; // center
-             
-             // If num >= denom, it's a full circle.
+             const c = 50; 
              if (num >= denom) return (
                  <svg width={size} height={size} viewBox="0 0 100 100">
                      <circle cx="50" cy="50" r="40" fill="#fbbf24" stroke="#78716c" strokeWidth="3" />
                  </svg>
              );
-
-             // Calculate path for slice
              const angle = (num / denom) * 2 * Math.PI;
              const x = c + r * Math.sin(angle);
              const y = c - r * Math.cos(angle);
-             
              const largeArc = num > denom / 2 ? 1 : 0;
-             
-             // Start from top (50, 10)
              const pathData = `M ${c} ${c} L ${c} ${c-r} A ${r} ${r} 0 ${largeArc} 1 ${x} ${y} Z`;
 
              return (
                  <svg width={size} height={size} viewBox="0 0 100 100">
-                    {/* Background circle */}
                     <circle cx="50" cy="50" r="40" fill="#fff" stroke="#e7e5e4" strokeWidth="1" />
-                    {/* Pie Slice */}
                     <path d={pathData} fill="#fbbf24" stroke="#78716c" strokeWidth="2" />
-                    {/* Border */}
                     <circle cx="50" cy="50" r="40" fill="none" stroke="#78716c" strokeWidth="3" />
-                    
-                    {/* Segmentation lines (optional, but helpful for kids) */}
                     {[...Array(denom)].map((_, i) => {
                         const a = (i / denom) * 2 * Math.PI;
                         const lx = c + r * Math.sin(a);
@@ -283,24 +260,29 @@
         // MAIN APP COMPONENT
         // ==========================================
         const App = () => {
-            // State
             const [currentLevel, setCurrentLevel] = useState(1);
             const [score, setScore] = useState(0);
             const [questionCount, setQuestionCount] = useState(0);
             const [currentQuestion, setCurrentQuestion] = useState(null);
-            const [feedback, setFeedback] = useState(null); // 'correct', 'incorrect', or null
-            const [gameState, setGameState] = useState('menu'); // 'menu', 'playing', 'levelComplete', 'victory'
-            const [gardenProgress, setGardenProgress] = useState([false, false, false, false, false]); // Tracks completed levels
+            const [feedback, setFeedback] = useState(null);
+            const [gameState, setGameState] = useState('menu');
+            // Updated to hold 10 levels (5 basic, 5 advanced)
+            const [gardenProgress, setGardenProgress] = useState([false, false, false, false, false, false, false, false, false, false]);
 
-            // Load progress from local storage on mount
             useEffect(() => {
                 const savedProgress = localStorage.getItem('fractionGardenProgress');
                 if (savedProgress) {
-                    setGardenProgress(JSON.parse(savedProgress));
+                    const parsed = JSON.parse(savedProgress);
+                    // Migration: If user had 5 levels, pad with 5 more falses
+                    if (parsed.length < 10) {
+                        const padded = [...parsed, ...Array(10 - parsed.length).fill(false)];
+                        setGardenProgress(padded);
+                    } else {
+                        setGardenProgress(parsed);
+                    }
                 }
             }, []);
 
-            // Save progress
             const saveProgress = (newProgress) => {
                 setGardenProgress(newProgress);
                 localStorage.setItem('fractionGardenProgress', JSON.stringify(newProgress));
@@ -309,12 +291,11 @@
             const resetProgress = () => {
                 if(confirm("Are you sure you want to clear your garden? All progress will be lost.")) {
                     localStorage.removeItem('fractionGardenProgress');
-                    setGardenProgress([false, false, false, false, false]);
+                    setGardenProgress(Array(10).fill(false));
                     setGameState('menu');
                 }
             };
 
-            // Start a level
             const startLevel = (level) => {
                 setCurrentLevel(level);
                 setScore(0);
@@ -323,7 +304,6 @@
                 loadQuestion(level);
             };
 
-            // Load next question based on level
             const loadQuestion = (level) => {
                 setFeedback(null);
                 let q;
@@ -333,28 +313,21 @@
                     case 3: q = generateLevel3Question(); break;
                     case 4: q = generateLevel4Question(); break;
                     case 5: q = generateLevel5Question(); break;
+                    case 6: q = generateLevel6Question(); break;
                     default: q = generateLevel1Question();
                 }
                 setCurrentQuestion(q);
             };
 
-            // Handle Answer
             const handleAnswer = (userAnswer) => {
-                // Determine correctness based on question type
                 let isCorrect = false;
                 const q = currentQuestion;
 
-                if (q.type === 'sequence') {
-                    isCorrect = parseInt(userAnswer) === q.correctAnswer;
-                } else if (q.type === 'magicOne') {
-                    isCorrect = parseInt(userAnswer) === q.correctAnswer;
-                } else if (q.type === 'makeOne') {
+                if (q.type === 'sequence' || q.type === 'magicOne' || q.type === 'makeOne' || q.type === 'giantOne' || q.type === 'target' || q.type === 'lcd') {
                     isCorrect = parseInt(userAnswer) === q.correctAnswer;
                 } else if (q.type === 'visual') {
-                     // For visual demo, we usually generate matching pairs, so 'Yes' is right.
-                     isCorrect = true; 
-                } else if (q.type === 'giantOne' || q.type === 'target') {
-                    isCorrect = parseInt(userAnswer) === q.correctAnswer;
+                     // Check Yes or No
+                     isCorrect = userAnswer === q.correctAnswer;
                 }
 
                 if (isCorrect) {
@@ -364,11 +337,9 @@
                     setFeedback('incorrect');
                 }
 
-                // Wait a moment then move on
                 setTimeout(() => {
                     const newCount = questionCount + 1;
                     setQuestionCount(newCount);
-
                     if (newCount >= CONFIG.questionsPerLevel) {
                         finishLevel(score + (isCorrect ? 1 : 0));
                     } else {
@@ -392,56 +363,101 @@
             // RENDER FUNCTIONS
             // ==========================================
 
-            const renderMenu = () => (
-                <div className="max-w-4xl mx-auto p-6">
-                    <header className="text-center mb-12">
-                        <h1 className="text-5xl font-bold text-stone-800 mb-2 handwritten">The Fraction Garden</h1>
-                        <p className="text-stone-600 text-lg">Cultivate your understanding, one fraction at a time.</p>
-                    </header>
+            const renderMenu = () => {
+                // Check if Phase 1 is complete (Levels 1-5)
+                const phase1Complete = gardenProgress.slice(0, 5).every(val => val === true);
+                
+                return (
+                    <div className="max-w-4xl mx-auto p-6">
+                        <header className="text-center mb-8">
+                            <h1 className="text-5xl font-bold text-stone-800 mb-2 handwritten">The Fraction Garden</h1>
+                            <p className="text-stone-600 text-lg">Cultivate your understanding, one fraction at a time.</p>
+                        </header>
 
-                    <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-                        {[
-                            { name: "The Seedling", sub: "Skip Counting", icon: Sprout, level: 1 },
-                            { name: "The Sprout", sub: "Magic One", icon: Leaf, level: 2 },
-                            { name: "The Sapling", sub: "Visuals", icon: Flower, level: 3 },
-                            { name: "The Tree", sub: "Giant One", icon: TreeDeciduous, level: 4 },
-                            { name: "The Forest", sub: "Common Denom", icon: Trophy, level: 5 },
-                        ].map((item) => (
-                            <button 
-                                key={item.level}
-                                onClick={() => startLevel(item.level)}
-                                className={`p-6 rounded-xl border-2 transition-all duration-300 flex flex-col items-center gap-3 shadow-sm hover:shadow-md
-                                    ${gardenProgress[item.level - 1] 
-                                        ? 'bg-green-50 border-green-200 text-green-800' 
-                                        : 'bg-white border-stone-200 text-stone-600 hover:border-amber-300'}`}
-                            >
-                                <item.icon size={40} className={gardenProgress[item.level - 1] ? 'text-green-600' : 'text-stone-400'} />
-                                <div className="text-center">
-                                    <div className="font-bold handwritten text-xl">{item.name}</div>
-                                    <div className="text-xs uppercase tracking-wide opacity-70">{item.sub}</div>
+                        {/* PHASE 1: THE OUTDOOR GARDEN */}
+                        <div className="mb-8">
+                            <h2 className="text-2xl font-bold text-stone-700 mb-4 border-b pb-2 flex items-center gap-2">
+                                <Sprout className="text-green-600"/> Phase 1: The Garden
+                            </h2>
+                            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                                {[
+                                    { name: "The Seedling", sub: "Skip Counting", icon: Sprout, level: 1 },
+                                    { name: "The Sprout", sub: "Magic One", icon: Leaf, level: 2 },
+                                    { name: "The Sapling", sub: "Visuals", icon: Flower, level: 3 },
+                                    { name: "The Tree", sub: "Giant One", icon: TreeDeciduous, level: 4 },
+                                    { name: "The Forest", sub: "Common Denom", icon: Trophy, level: 5 },
+                                ].map((item) => (
+                                    <button 
+                                        key={item.level}
+                                        onClick={() => startLevel(item.level)}
+                                        className={`p-6 rounded-xl border-2 transition-all duration-300 flex flex-col items-center gap-3 shadow-sm hover:shadow-md
+                                            ${gardenProgress[item.level - 1] 
+                                                ? 'bg-green-50 border-green-200 text-green-800' 
+                                                : 'bg-white border-stone-200 text-stone-600 hover:border-amber-300'}`}
+                                    >
+                                        <item.icon size={40} className={gardenProgress[item.level - 1] ? 'text-green-600' : 'text-stone-400'} />
+                                        <div className="text-center">
+                                            <div className="font-bold handwritten text-xl">{item.name}</div>
+                                            <div className="text-xs uppercase tracking-wide opacity-70">{item.sub}</div>
+                                        </div>
+                                        {gardenProgress[item.level - 1] && <CheckCircle size={20} className="text-green-500 mt-2" />}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* PHASE 2: THE GREENHOUSE (Unlockable) */}
+                        <div className="relative">
+                            <h2 className="text-2xl font-bold text-stone-700 mb-4 border-b pb-2 flex items-center gap-2">
+                                <Grid className="text-cyan-600"/> Phase 2: The Greenhouse
+                            </h2>
+                            
+                            <div className={`grid grid-cols-1 md:grid-cols-5 gap-4 ${!phase1Complete ? 'opacity-50 pointer-events-none' : ''}`}>
+                                {[
+                                    { name: "Common Ground", sub: "Finding LCD", icon: Grid, level: 6 },
+                                    { name: "Coming Soon", sub: "Simplifying", icon: Lock, level: 7 }, // Placeholder
+                                    { name: "Coming Soon", sub: "Adding Like", icon: Lock, level: 8 },
+                                    { name: "Coming Soon", sub: "Adding Unlike", icon: Lock, level: 9 },
+                                    { name: "Coming Soon", sub: "The Harvest", icon: Lock, level: 10 },
+                                ].map((item) => (
+                                    <button 
+                                        key={item.level}
+                                        onClick={() => startLevel(item.level)}
+                                        className={`p-6 rounded-xl border-2 transition-all duration-300 flex flex-col items-center gap-3 shadow-sm hover:shadow-md bg-white border-stone-200 text-stone-600 hover:border-cyan-300`}
+                                    >
+                                        <item.icon size={40} className="text-stone-400" />
+                                        <div className="text-center">
+                                            <div className="font-bold handwritten text-xl">{item.name}</div>
+                                            <div className="text-xs uppercase tracking-wide opacity-70">{item.sub}</div>
+                                        </div>
+                                    </button>
+                                ))}
+                            </div>
+
+                            {/* LOCK OVERLAY */}
+                            {!phase1Complete && (
+                                <div className="absolute inset-0 bg-stone-100/50 backdrop-blur-sm flex flex-col items-center justify-center rounded-xl z-10">
+                                    <Lock size={64} className="text-stone-400 mb-4" />
+                                    <h3 className="text-2xl font-bold text-stone-600 bg-white px-6 py-2 rounded-full shadow-sm">Complete Phase 1 to Unlock</h3>
                                 </div>
-                                {gardenProgress[item.level - 1] && <CheckCircle size={20} className="text-green-500 mt-2" />}
-                            </button>
-                        ))}
-                    </div>
+                            )}
+                        </div>
 
-                    <div className="mt-12 text-center">
-                        <button onClick={resetProgress} className="text-stone-400 hover:text-red-400 text-sm flex items-center justify-center gap-2 mx-auto">
-                            <RefreshCw size={14} /> Reset Garden Progress
-                        </button>
+                        <div className="mt-12 text-center">
+                            <button onClick={resetProgress} className="text-stone-400 hover:text-red-400 text-sm flex items-center justify-center gap-2 mx-auto">
+                                <RefreshCw size={14} /> Reset Garden Progress
+                            </button>
+                        </div>
                     </div>
-                </div>
-            );
+                );
+            };
 
             const renderGameContent = () => {
                 if (!currentQuestion) return <div>Loading...</div>;
-
                 const q = currentQuestion;
 
                 return (
                     <div className="max-w-2xl mx-auto bg-white p-8 rounded-3xl shadow-lg border border-stone-100 fade-in min-h-[400px] flex flex-col justify-between">
-                        
-                        {/* Header: Progress & Level Name */}
                         <div className="flex justify-between items-center mb-8 border-b border-stone-100 pb-4">
                             <div className="flex items-center gap-2 text-stone-500">
                                 <span className="font-bold">Level {currentLevel}</span>
@@ -453,13 +469,9 @@
                             </button>
                         </div>
 
-                        {/* Instruction */}
                         <h2 className="text-2xl text-center text-stone-800 mb-8 handwritten">{q.instruction}</h2>
 
-                        {/* Question Area */}
                         <div className="flex-grow flex flex-col items-center justify-center mb-8">
-                            
-                            {/* LEVEL 1: SEQUENCE */}
                             {q.type === 'sequence' && (
                                 <div className="flex gap-4 items-center flex-wrap justify-center">
                                     {q.sequence.map((num, i) => (
@@ -473,7 +485,6 @@
                                 </div>
                             )}
 
-                            {/* LEVEL 2: MAGIC ONE */}
                             {q.type === 'magicOne' && (
                                 <div className="text-4xl flex items-center gap-4">
                                     <Fraction top={q.fraction.top} bottom={q.fraction.bottom} size="text-4xl" />
@@ -481,6 +492,7 @@
                                     <span className="w-16 h-16 bg-amber-50 border-2 border-dashed border-amber-300 rounded flex items-center justify-center text-stone-400">?</span>
                                 </div>
                             )}
+                            
                             {q.type === 'makeOne' && (
                                 <div className="text-4xl flex items-center gap-4">
                                     <div className="fraction text-4xl font-bold text-stone-700">
@@ -492,9 +504,9 @@
                                 </div>
                             )}
 
-                            {/* LEVEL 3: VISUALS (Added this block!) */}
+                            {/* UPDATED LEVEL 3 VISUALS */}
                             {q.type === 'visual' && (
-                                <div className="flex items-center justify-center gap-12">
+                                <div className="flex items-center justify-center gap-8 md:gap-12">
                                     <div className="flex flex-col items-center gap-4">
                                         <FractionPie num={q.fraction1.top} denom={q.fraction1.bottom} />
                                         <Fraction top={q.fraction1.top} bottom={q.fraction1.bottom} />
@@ -507,7 +519,6 @@
                                 </div>
                             )}
 
-                            {/* LEVEL 4: GIANT ONE */}
                             {q.type === 'giantOne' && (
                                 <div className="flex items-center gap-4 text-3xl">
                                     <Fraction top={q.start.top} bottom={q.start.bottom} size="text-3xl" />
@@ -523,7 +534,6 @@
                                 </div>
                             )}
 
-                             {/* LEVEL 5: TARGET */}
                              {q.type === 'target' && (
                                 <div className="flex flex-col items-center gap-6">
                                     <div className="text-xl text-stone-500">Make the denominator <strong>{q.targetDenom}</strong></div>
@@ -545,26 +555,31 @@
                                 </div>
                             )}
 
+                            {/* LEVEL 6: LCD */}
+                            {q.type === 'lcd' && (
+                                <div className="flex flex-col items-center gap-6">
+                                    <div className="flex gap-8 items-center text-3xl">
+                                        <Fraction top={1} bottom={q.d1} size="text-4xl" />
+                                        <span className="text-stone-400">+</span>
+                                        <Fraction top={1} bottom={q.d2} size="text-4xl" />
+                                    </div>
+                                    <div className="text-stone-500">Common Denominator = ?</div>
+                                </div>
+                            )}
                         </div>
 
-                        {/* Input Area - Added 'Set' to remove duplicates from distractors */}
-                        <div className="flex justify-center gap-4">
+                        {/* Input Area */}
+                        <div className="flex justify-center gap-4 flex-wrap">
                             {q.type === 'sequence' && [...new Set([q.base*1, q.base*2, q.base*3, q.correctAnswer, q.base*10])].sort(() => Math.random() - 0.5).map(opt => (
-                                <button key={opt} onClick={() => handleAnswer(opt)} className="bg-stone-100 hover:bg-amber-100 text-stone-800 font-bold py-3 px-6 rounded-xl transition shadow-sm border border-stone-200 text-xl">
-                                    {opt}
-                                </button>
+                                <button key={opt} onClick={() => handleAnswer(opt)} className="bg-stone-100 hover:bg-amber-100 text-stone-800 font-bold py-3 px-6 rounded-xl transition shadow-sm border border-stone-200 text-xl">{opt}</button>
                             ))}
 
                             {q.type === 'magicOne' && [...new Set([1, 0, 10, q.fraction.top])].map(opt => (
-                                <button key={opt} onClick={() => handleAnswer(opt)} className="bg-stone-100 hover:bg-amber-100 text-stone-800 font-bold py-3 px-6 rounded-xl transition shadow-sm border border-stone-200 text-xl">
-                                    {opt}
-                                </button>
+                                <button key={opt} onClick={() => handleAnswer(opt)} className="bg-stone-100 hover:bg-amber-100 text-stone-800 font-bold py-3 px-6 rounded-xl transition shadow-sm border border-stone-200 text-xl">{opt}</button>
                             ))}
                             
                             {q.type === 'makeOne' && [...new Set([1, q.top, 0, 10])].sort(()=>Math.random()-0.5).map(opt => (
-                                <button key={opt} onClick={() => handleAnswer(opt)} className="bg-stone-100 hover:bg-amber-100 text-stone-800 font-bold py-3 px-6 rounded-xl transition shadow-sm border border-stone-200 text-xl">
-                                    {opt}
-                                </button>
+                                <button key={opt} onClick={() => handleAnswer(opt)} className="bg-stone-100 hover:bg-amber-100 text-stone-800 font-bold py-3 px-6 rounded-xl transition shadow-sm border border-stone-200 text-xl">{opt}</button>
                             ))}
 
                             {(q.type === 'giantOne' || q.type === 'target') && [2, 3, 4, 5].map(opt => (
@@ -574,14 +589,25 @@
                                 </button>
                             ))}
 
+                            {/* UPDATED VISUAL INPUTS */}
                             {q.type === 'visual' && (
-                                <button onClick={() => handleAnswer('yes')} className="bg-green-100 hover:bg-green-200 text-green-800 font-bold py-3 px-8 rounded-xl transition shadow-sm border border-green-200 text-xl flex items-center gap-2">
-                                    <CheckCircle size={24} /> Yes, they match!
-                                </button>
+                                <>
+                                    <button onClick={() => handleAnswer('yes')} className="bg-green-100 hover:bg-green-200 text-green-800 font-bold py-3 px-8 rounded-xl transition shadow-sm border border-green-200 text-xl flex items-center gap-2">
+                                        <CheckCircle size={24} /> Yes
+                                    </button>
+                                    <button onClick={() => handleAnswer('no')} className="bg-red-100 hover:bg-red-200 text-red-800 font-bold py-3 px-8 rounded-xl transition shadow-sm border border-red-200 text-xl flex items-center gap-2">
+                                        <XCircle size={24} /> No
+                                    </button>
+                                </>
                             )}
+
+                            {q.type === 'lcd' && [q.correctAnswer, q.correctAnswer+2, q.correctAnswer*2, Math.abs(q.d1-q.d2) || 10].sort(()=>Math.random()-0.5).map(opt => (
+                                <button key={opt} onClick={() => handleAnswer(opt)} className="bg-stone-100 hover:bg-cyan-100 text-stone-800 font-bold py-3 px-6 rounded-xl transition shadow-sm border border-stone-200 text-xl">
+                                    {opt}
+                                </button>
+                            ))}
                         </div>
 
-                        {/* Feedback Overlay */}
                         {feedback && (
                             <div className="absolute inset-0 bg-white/90 rounded-3xl flex flex-col items-center justify-center z-10 fade-in">
                                 {feedback === 'correct' ? (
@@ -638,12 +664,6 @@
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
-    </script>
-    
-    <!-- Icons auto-replacement -->
-    <script>
-        // No longer needed
-        // lucide.createIcons();
     </script>
 </body>
 </html>
